@@ -52,17 +52,40 @@
  	struct phylink			*phylink;
 --- a/drivers/net/ethernet/mediatek/mtk_eth_soc.c
 +++ b/drivers/net/ethernet/mediatek/mtk_eth_soc.c
-@@ -876,6 +876,9 @@ static void mtk_gdm_mac_link_up(struct m
- 	mcr &= ~(MAC_MCR_SPEED_100 | MAC_MCR_SPEED_1000 |
+@@ -34,6 +34,8 @@
+ #include "mtk_eth_soc.h"
+ #include "mtk_wed.h"
+ 
++bool is_mt7988_eth = false;
++
+ static int mtk_msg_level = -1;
+ module_param_named(msg_level, mtk_msg_level, int, 0);
+ MODULE_PARM_DESC(msg_level, "Message level (-1=defaults,0=none,...,16=all)");
+@@ -771,8 +773,11 @@ static int mtk_mac_finish(struct phylink
+ 	/* Setup gmac */
+ 	mcr_cur = mtk_r32(mac->hw, MTK_MAC_MCR(mac->id));
+ 	mcr_new = mcr_cur;
++
++	if (is_mt7988_eth) {
+ 	mcr_new |= MAC_MCR_IPG_CFG | MAC_MCR_FORCE_MODE |
+ 		   MAC_MCR_BACKOFF_EN | MAC_MCR_BACKPR_EN | MAC_MCR_RX_FIFO_CLR_DIS;
++	}
+ 
+ 	/* Only update control register when needed! */
+ 	if (mcr_new != mcr_cur)
+@@ -877,6 +882,11 @@ static void mtk_gdm_mac_link_up(struct m
  		 MAC_MCR_FORCE_DPX | MAC_MCR_FORCE_TX_FC |
  		 MAC_MCR_FORCE_RX_FC);
-+	mcr |= MAC_MCR_IPG_CFG | MAC_MCR_FORCE_MODE |
-+		MAC_MCR_BACKOFF_EN | MAC_MCR_BACKPR_EN |
-+		MAC_MCR_FORCE_LINK;
  
++	if (is_mt7988_eth) 
++		mcr |= MAC_MCR_IPG_CFG | MAC_MCR_FORCE_MODE |
++			MAC_MCR_BACKOFF_EN | MAC_MCR_BACKPR_EN |
++			MAC_MCR_FORCE_LINK;
++
  	/* Configure speed */
  	mac->speed = speed;
-@@ -3869,6 +3872,7 @@ static void mtk_set_mcr_max_rx(struct mt
+ 	switch (speed) {
+@@ -3869,6 +3879,7 @@ static void mtk_set_mcr_max_rx(struct mt
  	if (MTK_HAS_CAPS(eth->soc->caps, MTK_SOC_MT7628))
  		return;
  
@@ -70,14 +93,15 @@
  	mcr_cur = mtk_r32(mac->hw, MTK_MAC_MCR(mac->id));
  	mcr_new = mcr_cur & ~MAC_MCR_MAX_RX_MASK;
  
-@@ -3878,11 +3882,25 @@ static void mtk_set_mcr_max_rx(struct mt
+@@ -3878,11 +3889,27 @@ static void mtk_set_mcr_max_rx(struct mt
  		mcr_new |= MAC_MCR_MAX_RX(MAC_MCR_MAX_RX_1536);
  	else if (val <= 1552)
  		mcr_new |= MAC_MCR_MAX_RX(MAC_MCR_MAX_RX_1552);
 -	else
-+		else {
++			else {
  		mcr_new |= MAC_MCR_MAX_RX(MAC_MCR_MAX_RX_2048);
-+			mcr_new |= MAC_MCR_MAX_RX_JUMBO;
++				if (is_mt7988_eth) 
++					mcr_new |= MAC_MCR_MAX_RX_JUMBO;
 +		}
  
  	if (mcr_new != mcr_cur)
@@ -89,7 +113,8 @@
 +		if (val < MTK_MAX_RX_LENGTH_9K)
 +			mcr_new |= val;
 +		else
-+			mcr_new |= MTK_MAX_RX_LENGTH_9K;
++			if (is_mt7988_eth)
++				mcr_new |= MTK_MAX_RX_LENGTH_9K;
 +
 +		if (mcr_new != mcr_cur)
 +			mtk_w32(mac->hw, mcr_new, MTK_XMAC_RX_CFG2(mac->id));
@@ -97,7 +122,7 @@
  }
  
  static void mtk_hw_reset(struct mtk_eth *eth)
-@@ -4922,11 +4940,12 @@ static int mtk_add_mac(struct mtk_eth *e
+@@ -4922,11 +4949,17 @@ static int mtk_add_mac(struct mtk_eth *e
  
  	eth->netdev[id]->irq = eth->irq[0];
  	eth->netdev[id]->dev.of_node = np;
@@ -105,9 +130,29 @@
  
  	if (MTK_HAS_CAPS(eth->soc->caps, MTK_SOC_MT7628))
  		eth->netdev[id]->max_mtu = MTK_MAX_RX_LENGTH - MTK_RX_ETH_HLEN;
- 	else
--		eth->netdev[id]->max_mtu = MTK_MAX_RX_LENGTH_2K - MTK_RX_ETH_HLEN;
-+		eth->netdev[id]->max_mtu = MTK_MAX_RX_LENGTH_9K - MTK_RX_ETH_HLEN;
+-	else
++	else {
++		if (is_mt7988_eth) {
++			eth->netdev[id]->max_mtu = MTK_MAX_RX_LENGTH_9K - MTK_RX_ETH_HLEN;
++		} else { 
+ 		eth->netdev[id]->max_mtu = MTK_MAX_RX_LENGTH_2K - MTK_RX_ETH_HLEN;
++		}
++	}
  
  	if (MTK_HAS_CAPS(eth->soc->caps, MTK_QDMA)) {
  		mac->device_notifier.notifier_call = mtk_device_event;
+@@ -5032,6 +5065,14 @@ static int mtk_probe(struct platform_dev
+ 	struct mtk_eth *eth;
+ 	int err, i;
+ 
++	// Check for compatibility with "mediatek,mt7988-eth"
++	if (!of_device_is_compatible(pdev->dev.of_node, "mediatek,mt7988-eth")) {;
++		is_mt7988_eth = false;
++	} else {
++		dev_info(&pdev->dev, "Device compatible with mediatek,mt7988-eth - Jumbo frames capable\n");
++		is_mt7988_eth = true;
++	}
++
+ 	eth = devm_kzalloc(&pdev->dev, sizeof(*eth), GFP_KERNEL);
+ 	if (!eth)
+ 		return -ENOMEM;
