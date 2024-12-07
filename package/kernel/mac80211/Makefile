@@ -275,7 +275,7 @@ config-$(call config_package,rsi91x-sdio) += RSI_SDIO
 
 config-$(CONFIG_LEDS_TRIGGERS) += MAC80211_LEDS
 
-C_DEFINES=
+C_DEFINES=-Wno-implicit-function-declaration -Wno-int-conversion
 
 ifeq ($(BUILD_VARIANT),smallbuffers)
 	C_DEFINES+= -DCONFIG_ATH10K_SMALLBUFFERS
