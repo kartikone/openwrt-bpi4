@@ -11,11 +11,9 @@ Signed-off-by: Bo-Cun Chen <bc-bocun.chen@mediatek.com>
  net/netfilter/xt_FLOWOFFLOAD.c | 112 ++++++++++++++++++++++++++++-----
  1 file changed, 98 insertions(+), 14 deletions(-)
 
-diff --git a/net/netfilter/xt_FLOWOFFLOAD.c b/net/netfilter/xt_FLOWOFFLOAD.c
-index 08e0b94..2704d02 100644
 --- a/net/netfilter/xt_FLOWOFFLOAD.c
 +++ b/net/netfilter/xt_FLOWOFFLOAD.c
-@@ -386,10 +386,10 @@ static int nf_dev_fill_forward_path(const struct nf_flow_route *route,
+@@ -386,10 +386,10 @@ out:
  	return dev_fill_forward_path(dev, ha, stack);
  }
  
@@ -30,7 +28,7 @@ index 08e0b94..2704d02 100644
  {
  	const struct dst_entry *dst = route->tuple[dir].dst;
  	struct net_device_path_stack stack;
-@@ -402,7 +402,7 @@ static void nf_dev_forward_path(struct nf_flow_route *route,
+@@ -402,7 +402,7 @@ static void nf_dev_forward_path(struct n
  
  	devs[!dir] = (struct net_device *)info.indev;
  	if (!info.indev)
@@ -39,7 +37,7 @@ index 08e0b94..2704d02 100644
  
  	route->tuple[!dir].in.ifindex = info.indev->ifindex;
  	for (i = 0; i < info.num_encaps; i++) {
-@@ -419,13 +419,15 @@ static void nf_dev_forward_path(struct nf_flow_route *route,
+@@ -419,13 +419,15 @@ static void nf_dev_forward_path(struct n
  		route->tuple[dir].out.hw_ifindex = info.hw_outdev->ifindex;
  		route->tuple[dir].xmit_type = info.xmit_type;
  	}
@@ -59,7 +57,7 @@ index 08e0b94..2704d02 100644
  {
  	struct dst_entry *this_dst = skb_dst(skb);
  	struct dst_entry *other_dst = NULL;
-@@ -456,13 +458,90 @@ xt_flowoffload_route(struct sk_buff *skb, const struct nf_conn *ct,
+@@ -456,13 +458,90 @@ xt_flowoffload_route(struct sk_buff *skb
  	nf_default_forward_path(route, this_dst, dir, devs);
  	nf_default_forward_path(route, other_dst, !dir, devs);
  
@@ -153,7 +151,7 @@ index 08e0b94..2704d02 100644
  }
  
  static unsigned int
-@@ -520,8 +599,13 @@ flowoffload_tg(struct sk_buff *skb, const struct xt_action_param *par)
+@@ -520,8 +599,13 @@ flowoffload_tg(struct sk_buff *skb, cons
  	if (test_and_set_bit(IPS_OFFLOAD_BIT, &ct->status))
  		return XT_CONTINUE;
  
@@ -169,6 +167,3 @@ index 08e0b94..2704d02 100644
  
  	flow = flow_offload_alloc(ct);
  	if (!flow)
--- 
-2.45.2
-
