@@ -30,7 +30,7 @@
 				mod-def0-gpios = <&pio 82 GPIO_ACTIVE_LOW>;
 				los-gpios = <&pio 81 GPIO_ACTIVE_HIGH>;
 				tx-disable-gpios = <&pio 36 GPIO_ACTIVE_HIGH>;
-				maximum-power-milliwatt = <3000>;
+				maximum-power-milliwatt = <2500>;
 			};
 		};
 	};
