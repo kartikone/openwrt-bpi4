@@ -45,7 +45,7 @@
 		tx-disable-gpios = <&pio 70 GPIO_ACTIVE_HIGH>;
 		tx-fault-gpios = <&pio 69 GPIO_ACTIVE_HIGH>;
 		rate-select0-gpios = <&pio 21 GPIO_ACTIVE_LOW>;
-		maximum-power-milliwatt = <2500>;
+		maximum-power-milliwatt = <2000>;
 	};
 
 	gpio-keys {
