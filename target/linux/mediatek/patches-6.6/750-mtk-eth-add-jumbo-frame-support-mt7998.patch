@@ -122,7 +122,7 @@
  }
  
  static void mtk_hw_reset(struct mtk_eth *eth)
-@@ -4922,11 +4949,17 @@ static int mtk_add_mac(struct mtk_eth *e
+@@ -4924,11 +4951,17 @@ static int mtk_add_mac(struct mtk_eth *e
  
  	eth->netdev[id]->irq = eth->irq[0];
  	eth->netdev[id]->dev.of_node = np;
@@ -141,7 +141,7 @@
  
  	if (MTK_HAS_CAPS(eth->soc->caps, MTK_QDMA)) {
  		mac->device_notifier.notifier_call = mtk_device_event;
-@@ -5032,6 +5065,14 @@ static int mtk_probe(struct platform_dev
+@@ -5034,6 +5067,14 @@ static int mtk_probe(struct platform_dev
  	struct mtk_eth *eth;
  	int err, i;
  

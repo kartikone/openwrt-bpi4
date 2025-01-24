@@ -20,7 +20,7 @@ Subject: [PATCH 3/3] 999-xHCI-03-usb-add-embedded-Host-feature-support.patch
  		return -ENOTSUPP;
  	}
  
-@@ -4985,9 +4987,11 @@ hub_port_init(struct usb_hub *hub, struc
+@@ -4987,9 +4989,11 @@ hub_port_init(struct usb_hub *hub, struc
  				goto fail;
  			}
  			if (maxp0 < 0) {
