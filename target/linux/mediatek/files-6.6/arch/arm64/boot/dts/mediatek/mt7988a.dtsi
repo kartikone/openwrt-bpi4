@@ -112,6 +112,17 @@
 				opp-hz = /bits/ 64 <1800000000>;
 				opp-microvolt = <900000>;
 			};
+
+			opp04 {
+				opp-hz = /bits/ 64 <2000000000>;
+				opp-microvolt = <900000>;
+			};
+
+			opp05 {
+				opp-hz = /bits/ 64 <2200000000>;
+				opp-microvolt = <900000>;
+			};
+
 		};
 	};
 
@@ -137,6 +148,16 @@
 		opp03 {
 			opp-hz = /bits/ 64 <1080000000>;
 			opp-microvolt = <900000>;
+		};
+
+		opp04 {
+			opp-hz = /bits/ 64 <2100000000>;
+			opp-microvolt = <950000>;
+		};
+		
+		opp05 {
+			opp-hz = /bits/ 64 <2400000000>;
+			opp-microvolt = <1000000>;
 		};
 	};
 
@@ -1463,11 +1484,15 @@
 		eth: ethernet@15100000 {
 			compatible = "mediatek,mt7988-eth";
 			reg = <0 0x15100000 0 0x80000>,
-			      <0 0x15400000 0 0x380000>;
-			interrupts = <GIC_SPI 196 IRQ_TYPE_LEVEL_HIGH>,
-				     <GIC_SPI 197 IRQ_TYPE_LEVEL_HIGH>,
-				     <GIC_SPI 198 IRQ_TYPE_LEVEL_HIGH>,
-				     <GIC_SPI 199 IRQ_TYPE_LEVEL_HIGH>;
+			      <0 0x15400000 0 0x200000>;
+			interrupts = <GIC_SPI 189 IRQ_TYPE_LEVEL_HIGH>,
+					<GIC_SPI 190 IRQ_TYPE_LEVEL_HIGH>,
+					<GIC_SPI 191 IRQ_TYPE_LEVEL_HIGH>,
+					<GIC_SPI 192 IRQ_TYPE_LEVEL_HIGH>,
+					<GIC_SPI 196 IRQ_TYPE_LEVEL_HIGH>,
+					<GIC_SPI 197 IRQ_TYPE_LEVEL_HIGH>,
+					<GIC_SPI 198 IRQ_TYPE_LEVEL_HIGH>,
+					<GIC_SPI 199 IRQ_TYPE_LEVEL_HIGH>;
 			clocks = <&ethsys CLK_ETHDMA_XGP1_EN>,
 				 <&ethsys CLK_ETHDMA_XGP2_EN>,
 				 <&ethsys CLK_ETHDMA_XGP3_EN>,

@@ -26,6 +26,8 @@
 				reset-gpios = <&pio 71 GPIO_ACTIVE_LOW>;
 				reset-assert-us = <100000>;
 				reset-deassert-us = <221000>;
+				eee-broken-10gt;
+				eee-broken-1000t;
 			};
 		};
 	};
